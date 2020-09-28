@@ -134,11 +134,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop() called");
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy() called");
     }
-
 
 }
 
