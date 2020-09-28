@@ -4,18 +4,17 @@ public class Question {
 
     private int mTextResId;
     private boolean mAnswerTrue;
-    // 0: NOT ANSWERED 1：CORRECT -1：INCORRECT
-    private int mIsAnswered;
+    private boolean mIsAnswered;
 
-    public int getIsAnswered() {
+    public boolean isAnswered() {
         return mIsAnswered;
     }
 
-    public void setIsAnswered(int isAnswered) {
+    public void setAnswered(boolean isAnswered) {
         mIsAnswered = isAnswered;
     }
 
-    public Question(int textResId, boolean answerTrue, int isAnswered) {
+    public Question(int textResId, boolean answerTrue, boolean isAnswered) {
         mTextResId = textResId;
         mAnswerTrue = answerTrue;
         mIsAnswered = isAnswered;

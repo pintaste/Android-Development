@@ -23,14 +23,18 @@ public class MainActivity extends AppCompatActivity {
     private TextView mQuestionTextView;
 
     private Question[] mQuestionBank = new Question[]{
-            new Question(R.string.question_australia, true,0),
-            new Question(R.string.question_oceans, true,0),
-            new Question(R.string.question_mideast, false,0),
-            new Question(R.string.question_africa, false,0),
-            new Question(R.string.question_americas, true,0),
-            new Question(R.string.question_asia, true,0)
+            new Question(R.string.question_australia, true,false),
+            new Question(R.string.question_oceans, true,false),
+            new Question(R.string.question_mideast, false,false),
+            new Question(R.string.question_africa, false,false),
+            new Question(R.string.question_americas, true,false),
+            new Question(R.string.question_asia, true,false)
     };
+
     private int mCurrentIndex = 0;
+
+    private int mCorrectCount = 0;
+    private int mIncorrectCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,17 +43,16 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate(Bundle) called");
         setContentView(R.layout.activity_main);
 
-//        if (savedInstanceState != null) {
-//            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
-//            int [] answeredList = savedInstanceState.getIntArray(KEY_ANSWERED);
-//            for(int i = 0; i < mQuestionBank.length; i++)
-//            {
-//                mQuestionBank[i].setIsAnswered(answeredList[i]);
-//            }
-//        }
+        if (savedInstanceState != null) {
+            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+            boolean [] answeredList = savedInstanceState.getBooleanArray(KEY_ANSWERED);
+            for(int i = 0; i < mQuestionBank.length; i++)
+            {
+                mQuestionBank[i].setAnswered(answeredList[i]);
+            }
+        }
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
-        updateQuestion();
 
         // challenge 2.7: set a Listener for questionTextView
         // go to the next question when clicked
@@ -76,6 +79,9 @@ public class MainActivity extends AppCompatActivity {
                 checkAnswer(false);
             }
         });
+
+        // place updateQuestion method here because waiting the mTrueButton and mFalseButton instantiation.
+        updateQuestion();
 
         // challenge 2.8 add a PREV button
         // go back last question when clicked
@@ -106,32 +112,39 @@ public class MainActivity extends AppCompatActivity {
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
-        //setButtonState();
+        setButtonState();
     }
 
     private void checkAnswer(boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
         int messageResId = 0;
-
         if (userPressedTrue == answerIsTrue) {
             messageResId = R.string.correct_toast;
-            mQuestionBank[mCurrentIndex].setIsAnswered(1);
+            mQuestionBank[mCurrentIndex].setAnswered(true);
+            mCorrectCount++;
         } else {
             messageResId = R.string.incorrect_toast;
-            mQuestionBank[mCurrentIndex].setIsAnswered(-1);
+            mQuestionBank[mCurrentIndex].setAnswered(true);
+            mIncorrectCount++;
         }
-
-        //setButtonState();
+        setButtonState();
 
         Toast t = Toast.makeText(this, messageResId, Toast.LENGTH_SHORT);
         // challenge 1.11: show the toast message at top of screen.
         t.setGravity(Gravity.TOP, 0, 0);
         t.show();
+
+        //TODO: The output result always display 0.0
+        if((mCorrectCount + mIncorrectCount) >= mQuestionBank.length) {
+            double correctRate = mCorrectCount / mQuestionBank.length * 100;
+            Toast.makeText(this, "Correct rate: " + correctRate, Toast.LENGTH_SHORT)
+                    .show();
+        }
     }
 
     // challenge 3.7: only can answer once
     public void setButtonState() {
-        if(mQuestionBank[mCurrentIndex].getIsAnswered() == 0) {
+        if(mQuestionBank[mCurrentIndex].isAnswered() == false) {
             mTrueButton.setEnabled(true);
             mFalseButton.setEnabled(true);
         }
@@ -167,12 +180,14 @@ public class MainActivity extends AppCompatActivity {
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
 
         // creates an arr to store the state of answering.
-//        int [] answeredList = new int[mQuestionBank.length];
-//        for(int i = 0; i < mQuestionBank.length; i++) {
-//            answeredList[i] = mQuestionBank[i].getIsAnswered();
-//        }
-//        savedInstanceState.putIntArray(KEY_ANSWERED,answeredList);
+        boolean [] answeredList = new boolean[mQuestionBank.length];
+        for(int i = 0; i < mQuestionBank.length; i++) {
+            answeredList[i] = mQuestionBank[i].isAnswered();
+        }
+        savedInstanceState.putBooleanArray(KEY_ANSWERED,answeredList);
     }
+
+    //TODO: challenge 3.8： when user answered all question, show a toast message of correct percentage.
 
     @Override
     public void onRestart() {
