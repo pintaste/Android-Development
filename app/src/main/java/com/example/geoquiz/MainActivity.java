@@ -13,7 +13,8 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "QuizActivity";
-    private static final String KEY_INDEX = "index";
+    private static final String KEY_INDEX = "Index";
+    private static final String KEY_ANSWERED = "Answered";
 
     private Button mTrueButton;
     private Button mFalseButton;
@@ -22,12 +23,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView mQuestionTextView;
 
     private Question[] mQuestionBank = new Question[]{
-            new Question(R.string.question_australia, true),
-            new Question(R.string.question_oceans, true),
-            new Question(R.string.question_mideast, false),
-            new Question(R.string.question_africa, false),
-            new Question(R.string.question_americas, true),
-            new Question(R.string.question_asia, true)
+            new Question(R.string.question_australia, true,0),
+            new Question(R.string.question_oceans, true,0),
+            new Question(R.string.question_mideast, false,0),
+            new Question(R.string.question_africa, false,0),
+            new Question(R.string.question_americas, true,0),
+            new Question(R.string.question_asia, true,0)
     };
     private int mCurrentIndex = 0;
 
@@ -38,12 +39,18 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate(Bundle) called");
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState != null) {
-            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
-        }
+//        if (savedInstanceState != null) {
+//            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+//            int [] answeredList = savedInstanceState.getIntArray(KEY_ANSWERED);
+//            for(int i = 0; i < mQuestionBank.length; i++)
+//            {
+//                mQuestionBank[i].setIsAnswered(answeredList[i]);
+//            }
+//        }
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
         updateQuestion();
+
         // challenge 2.7: set a Listener for questionTextView
         // go to the next question when clicked
         mQuestionTextView.setOnClickListener(new View.OnClickListener() {
@@ -99,20 +106,40 @@ public class MainActivity extends AppCompatActivity {
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
+        //setButtonState();
     }
 
     private void checkAnswer(boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
         int messageResId = 0;
+
         if (userPressedTrue == answerIsTrue) {
             messageResId = R.string.correct_toast;
+            mQuestionBank[mCurrentIndex].setIsAnswered(1);
         } else {
             messageResId = R.string.incorrect_toast;
+            mQuestionBank[mCurrentIndex].setIsAnswered(-1);
         }
+
+        //setButtonState();
+
         Toast t = Toast.makeText(this, messageResId, Toast.LENGTH_SHORT);
         // challenge 1.11: show the toast message at top of screen.
         t.setGravity(Gravity.TOP, 0, 0);
         t.show();
+    }
+
+    // challenge 3.7: only can answer once
+    public void setButtonState() {
+        if(mQuestionBank[mCurrentIndex].getIsAnswered() == 0) {
+            mTrueButton.setEnabled(true);
+            mFalseButton.setEnabled(true);
+        }
+        else
+        {
+            mTrueButton.setEnabled(false);
+            mFalseButton.setEnabled(false);
+        }
     }
 
     @Override
@@ -138,6 +165,13 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+
+        // creates an arr to store the state of answering.
+//        int [] answeredList = new int[mQuestionBank.length];
+//        for(int i = 0; i < mQuestionBank.length; i++) {
+//            answeredList[i] = mQuestionBank[i].getIsAnswered();
+//        }
+//        savedInstanceState.putIntArray(KEY_ANSWERED,answeredList);
     }
 
     @Override

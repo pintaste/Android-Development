@@ -4,10 +4,21 @@ public class Question {
 
     private int mTextResId;
     private boolean mAnswerTrue;
+    // 0: NOT ANSWERED 1：CORRECT -1：INCORRECT
+    private int mIsAnswered;
 
-    public Question(int mTextResId, boolean mAnswerTrue) {
-        this.mTextResId = mTextResId;
-        this.mAnswerTrue = mAnswerTrue;
+    public int getIsAnswered() {
+        return mIsAnswered;
+    }
+
+    public void setIsAnswered(int isAnswered) {
+        mIsAnswered = isAnswered;
+    }
+
+    public Question(int textResId, boolean answerTrue, int isAnswered) {
+        mTextResId = textResId;
+        mAnswerTrue = answerTrue;
+        mIsAnswered = isAnswered;
     }
 
     public int getTextResId() {
