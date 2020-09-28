@@ -3,6 +3,7 @@ package com.example.geoquiz;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -13,6 +14,7 @@ public class MainActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mNextButton;
+    private Button mPrevButton;
     private TextView mQuestionTextView;
 
     private Question[] mQuestionBank = new Question[] {
@@ -31,14 +33,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
-//        int question = mQuestionBank[mCurrentIndex].getTextResId();
-//        mQuestionTextView.setText(question);
 
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, R.string.correct_toast, Toast.LENGTH_SHORT).show();
+                checkAnswer(true);
             }
         });
 
@@ -46,8 +46,7 @@ public class MainActivity extends AppCompatActivity {
         mFalseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, R.string.incorrect_toast, Toast.LENGTH_SHORT)
-                        .show();
+                checkAnswer(false);
             }
         });
 
@@ -56,13 +55,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-//              int question = mQuestionBank[mCurrentIndex].getTextResId();
-//              mQuestionTextView.setText(question);
                 updateQuestion();
             }
         });
 
         updateQuestion();
+
+        // challenge 2.7: set a Listener for questionTextView
+        // go to the next question when clicked
+        mQuestionTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                updateQuestion();
+            }
+        });
+
+        // challenge 2.8 add a PREV button
+        // go back last question when clicked
+        mPrevButton = (Button) findViewById(R.id.prev_button);
+        mPrevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
+                updateQuestion();
+            }
+        });
+
     }
         private void updateQuestion() {
             int question = mQuestionBank[mCurrentIndex].getTextResId();
@@ -77,8 +96,11 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 messageResId = R.string.incorrect_toast;
             }
-            Toast.makeText(this,messageResId, Toast.LENGTH_SHORT)
-                    .show();
+            Toast t = Toast.makeText(this,messageResId, Toast.LENGTH_SHORT);
+            // challenge 1.11: show the toast message at top of screen.
+            t.setGravity(Gravity.TOP,0,0);
+            t.show();
+
         }
     }
 
