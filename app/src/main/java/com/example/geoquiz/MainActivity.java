@@ -2,6 +2,9 @@ package com.example.geoquiz;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.icu.text.DecimalFormat;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -15,11 +18,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "Index";
     private static final String KEY_ANSWERED = "Answered";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mNextButton;
     private Button mPrevButton;
+    private Button mCheatButton;
     private TextView mQuestionTextView;
 
     private Question[] mQuestionBank = new Question[]{
@@ -32,9 +37,9 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private int mCurrentIndex = 0;
-
     private int mCorrectCount = 0;
     private int mIncorrectCount = 0;
+    private boolean mIsCheater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +85,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Intent intent = new Intent(MainActivity.this, CheatActivity.class);
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent = CheatActivity.newIntent(MainActivity.this, answerIsTrue);
+                // startActivity(intent);
+                startActivityForResult(intent, REQUEST_CODE_CHEAT);
+            }
+        });
+
         // place updateQuestion method here because waiting the mTrueButton and mFalseButton instantiation.
         updateQuestion();
 
@@ -104,9 +121,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                mIsCheater = false;
                 updateQuestion();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+        if (requestCode == REQUEST_CODE_CHEAT) {
+            if (data == null) {
+                return;
+            }
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
     }
 
     private void updateQuestion() {
@@ -118,33 +149,38 @@ public class MainActivity extends AppCompatActivity {
     private void checkAnswer(boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
         int messageResId = 0;
-        if (userPressedTrue == answerIsTrue) {
-            messageResId = R.string.correct_toast;
-            mQuestionBank[mCurrentIndex].setAnswered(true);
-            mCorrectCount++;
-        } else {
-            messageResId = R.string.incorrect_toast;
-            mQuestionBank[mCurrentIndex].setAnswered(true);
-            mIncorrectCount++;
+        if (mIsCheater) {
+            messageResId = R.string.judgment_toast;
         }
-        setButtonState();
+        else {
+            if (userPressedTrue == answerIsTrue) {
+                messageResId = R.string.correct_toast;
+                mQuestionBank[mCurrentIndex].setAnswered(true);
+                mCorrectCount++;
+            } else {
+                messageResId = R.string.incorrect_toast;
+                mQuestionBank[mCurrentIndex].setAnswered(true);
+                mIncorrectCount++;
+            }
+            setButtonState();
+        }
 
         Toast t = Toast.makeText(this, messageResId, Toast.LENGTH_SHORT);
         // challenge 1.11: show the toast message at top of screen.
         t.setGravity(Gravity.TOP, 0, 0);
         t.show();
 
-        //TODO: The output result always display 0.0
         if((mCorrectCount + mIncorrectCount) >= mQuestionBank.length) {
-            double correctRate = mCorrectCount / mQuestionBank.length * 100;
-            Toast.makeText(this, "Correct rate: " + correctRate, Toast.LENGTH_SHORT)
+            DecimalFormat df = new DecimalFormat("0.00");
+            double correctRate = (double)mCorrectCount / mQuestionBank.length * 100;
+            Toast.makeText(this, "Correct rate: " + df.format(correctRate) + "%", Toast.LENGTH_SHORT)
                     .show();
         }
     }
 
     // challenge 3.7: only can answer once
     public void setButtonState() {
-        if(mQuestionBank[mCurrentIndex].isAnswered() == false) {
+        if(!mQuestionBank[mCurrentIndex].isAnswered()) {
             mTrueButton.setEnabled(true);
             mFalseButton.setEnabled(true);
         }
@@ -187,8 +223,6 @@ public class MainActivity extends AppCompatActivity {
         savedInstanceState.putBooleanArray(KEY_ANSWERED,answeredList);
     }
 
-    //TODO: challenge 3.8： when user answered all question, show a toast message of correct percentage.
-
     @Override
     public void onRestart() {
         super.onRestart();
@@ -207,6 +241,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onDestroy() called");
     }
 
+    //TODO: Challenge 5.5:
 }
 
 
