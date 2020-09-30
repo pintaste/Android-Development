@@ -8,9 +8,9 @@ Practice Project: GeoQuiz
 
 中文译名：Android 编程权威指南 第三版
 
-范围：第一章至第六章
+范围：第一章 至 第六章
 
-联系项目：GeoQuiz
+练习项目：GeoQuiz
 
 ---
 TODO List
