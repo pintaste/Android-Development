@@ -9,6 +9,6 @@
 ☑️ CriminalIntent
 
 
-### Other Android Code
+### Design Pattern
 
 ☑️ Singleton Model Demo
