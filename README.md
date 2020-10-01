@@ -11,4 +11,4 @@
 
 ### Design Pattern
 
-☑️ Singleton Model Demo
+✅ Singleton Model Demo
